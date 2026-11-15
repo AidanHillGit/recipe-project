@@ -1,0 +1,22 @@
+# Docker Compose allows for us to easily use pre-made data and settings, including the proper version, installing PostgresSQL is not required
+# recipe and list app that allows user to easily find recipes, stores them, and create list based off nutriation data and their goals
+services:
+# data base of user recipes
+  db:
+  # image using postgres 17 not 18, the features added in postgres 18 are not needed for this project. Using a more mature version
+    image: postgres:17
+  # users configuration details, variables needed for the container
+    environment:
+      POSTGRES_USER: recipe
+      POSTGRES_PASSWORD: recipe
+      POSTGRES_DB: recipes
+  # connects Postgres to the Host
+    ports:
+      - "5432:5432"
+  # where the Postgres data is kept outside the container, this allows the datatables to survive when the container is stopped or deleted
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # second volume tells docker to create and manage the persistant storage and space
+volumes:
+  pgdata:
