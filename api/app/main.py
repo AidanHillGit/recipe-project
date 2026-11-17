@@ -1,9 +1,19 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, status
+from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
+
+from app.database import engine
 
 app = FastAPI(title="Recipe API")
 
 
 @app.get("/health")
-async def health_check() -> dict[str, str]:
-    """Report that the API is running."""
-    return {"status": "ok"}
+def health_check(response: Response) -> dict[str, str]:
+    """Report that the API is running and the database is reachable."""
+    try:   
+        with engine.connect() as connection:                                # open the connection
+            connection.execute(text("SELECT 1"))                            # ask the database simplest question for health check
+        return {"status": "ok", "database": "ok"}
+    except OperationalError:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        return {"status": "error", "database": "unreachable"}
