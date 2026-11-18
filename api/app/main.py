@@ -10,7 +10,7 @@ app = FastAPI(title="Recipe API")
 @app.get("/health")
 def health_check(response: Response) -> dict[str, str]:
     """Report that the API is running and the database is reachable."""
-    try:   
+    try:
         with engine.connect() as connection:                                # open the connection
             connection.execute(text("SELECT 1"))                            # ask the database simplest question for health check
         return {"status": "ok", "database": "ok"}
