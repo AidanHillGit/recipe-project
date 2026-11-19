@@ -3,8 +3,12 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from app.database import engine
+from app.routers import auth
+
 
 app = FastAPI(title="Recipe API")
+
+app.include_router(auth.router)
 
 
 @app.get("/health")
