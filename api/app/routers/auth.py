@@ -2,14 +2,15 @@ from typing import Annotated
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
 
 from fastapi import Depends, HTTPException, APIRouter, status
+from fastapi.security import OAuth2PasswordRequestForm
 
-
-from app.deps import get_db
+from app.deps import get_db, get_current_user
 from app.models import User
-from app.schemas import UserCreate, UserRead
-from app.security import hash_password
+from app.schemas import UserCreate, UserRead, Token
+from app.security import hash_password, verify_password, create_access_token
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -35,3 +36,29 @@ def register(user_in: UserCreate, db: Annotated[Session, Depends(get_db)]):
     
     db.refresh(user)
     return user
+
+
+@router.post("/login", response_model=Token)
+def login(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Annotated[Session, Depends(get_db)],
+):
+    """Create login token when information is correct"""
+    user = db.scalar(select(User).where(User.email == form_data.username))
+
+    if not user or not verify_password(form_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return Token(access_token=create_access_token(user.id))
+
+
+@router.get("/me", response_model=UserRead)
+def read_current_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """Read user."""
+    return current_user
