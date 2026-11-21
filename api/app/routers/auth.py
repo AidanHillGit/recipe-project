@@ -7,7 +7,7 @@ from sqlalchemy import select
 from fastapi import Depends, HTTPException, APIRouter, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.deps import get_db
+from app.deps import get_db, get_current_user
 from app.models import User
 from app.schemas import UserCreate, UserRead, Token
 from app.security import hash_password, verify_password, create_access_token
@@ -55,3 +55,10 @@ def login(
 
     return Token(access_token=create_access_token(user.id))
 
+
+@router.get("/me", response_model=UserRead)
+def read_current_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """Read user."""
+    return current_user
