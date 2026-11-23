@@ -3,7 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from app.database import engine
-from app.routers import auth
+from app.routers import auth, recipes
 
 
 app = FastAPI(title="Recipe API")
