@@ -9,7 +9,7 @@ from app.routers import auth, recipes
 app = FastAPI(title="Recipe API")
 
 app.include_router(auth.router)
-app.include_router(auth.recipe)
+app.include_router(recipes.router)
 
 
 @app.get("/health")
