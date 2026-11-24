@@ -1,19 +1,18 @@
 from typing import Annotated
 
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select
-
-from fastapi import Depends, HTTPException, APIRouter, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
-from app.deps import get_db, get_current_user
+from app.deps import get_current_user, get_db
 from app.models import User
-from app.schemas import UserCreate, UserRead, Token
-from app.security import hash_password, verify_password, create_access_token
-
+from app.schemas import Token, UserCreate, UserRead
+from app.security import create_access_token, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
 
 @router.post("/register", status_code=status.HTTP_201_CREATED, response_model=UserRead)
 def register(user_in: UserCreate, db: Annotated[Session, Depends(get_db)]):
@@ -27,13 +26,13 @@ def register(user_in: UserCreate, db: Annotated[Session, Depends(get_db)]):
 
     try:
         db.commit()
-    except IntegrityError:
+    except IntegrityError as err:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Email already registered",
-        )
-    
+        ) from err
+
     db.refresh(user)
     return user
 
