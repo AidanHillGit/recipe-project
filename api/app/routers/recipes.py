@@ -55,7 +55,9 @@ def read_recipe(
     """Return one of the logged-in user's recipes, or 404."""
     recipe = db.get(Recipe, recipe_id)
     if recipe is None or recipe.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recipe not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Recipe not found"
+        )
     return recipe
 
 
@@ -68,6 +70,8 @@ def delete_recipe(
     """Delete one of the logged-in user's recipes, or 404."""
     recipe = db.get(Recipe, recipe_id)
     if recipe is None or recipe.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recipe not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Recipe not found"
+        )
     db.delete(recipe)
     db.commit()
